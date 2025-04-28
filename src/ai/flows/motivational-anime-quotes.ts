@@ -93,7 +93,8 @@ const motivationalAnimeQuotesFlow = ai.defineFlow<
           delay *= 2; // Exponential backoff
         } else {
           // If it's a different error, re-throw it
-          throw error;
+          console.error('Error getting motivational quote:', error);
+          throw new Error('Failed to get a motivational quote.');
         }
       }
     }

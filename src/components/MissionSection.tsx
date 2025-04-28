@@ -7,12 +7,13 @@ import {useToast} from "@/hooks/use-toast";
 
 export const MissionSection = () => {
   const [missions, setMissions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const {toast} = useToast();
 
   useEffect(() => {
     const fetchMissions = async () => {
+      setIsLoading(true);
       try {
-        // Replace with your actual token retrieval logic
         const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
         const response = await fetch('/api/missions', {
           headers: {
@@ -20,23 +21,28 @@ export const MissionSection = () => {
           },
         });
         if (!response.ok) {
+          let errorMessage = `HTTP error! status: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            // If JSON parsing fails, use the original error message
+          }
+
           if (response.status === 401) {
             toast({
               title: 'Unauthorized',
               description: 'Please log in to view your missions.',
               variant: 'destructive',
             });
-            return;
-          }
-          if (response.status === 500) {
+          } else {
             toast({
               title: 'Mission Error',
-              description: 'Failed to load missions. Please try again later.',
+              description: errorMessage,
               variant: 'destructive',
             });
-            return;
           }
-          throw new Error(`HTTP error! status: ${response.status}`);
+          return;
         }
         const data = await response.json();
         setMissions(data.missions);
@@ -47,6 +53,8 @@ export const MissionSection = () => {
           description: error.message,
           variant: 'destructive',
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -92,16 +100,20 @@ export const MissionSection = () => {
         <CardDescription>Complete these missions to earn XP.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {missions.map(mission => (
-          <div key={mission.id} className="flex items-center justify-between">
-            <div>
-              <h4 className="font-semibold">{mission.title}</h4>
-              <p className="text-sm text-muted-foreground">{mission.description}</p>
-              <p className="text-sm text-muted-foreground">Reward: {mission.rewardXp} XP</p>
+        {isLoading ? (
+          <p>Loading missions...</p>
+        ) : (
+          missions.map(mission => (
+            <div key={mission.id} className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold">{mission.title}</h4>
+                <p className="text-sm text-muted-foreground">{mission.description}</p>
+                <p className="text-sm text-muted-foreground">Reward: {mission.rewardXp} XP</p>
+              </div>
+              <Button onClick={() => handleSubmitMission(mission.id)}>Submit Completion</Button>
             </div>
-            <Button onClick={() => handleSubmitMission(mission.id)}>Submit Completion</Button>
-          </div>
-        ))}
+          ))
+        )}
       </CardContent>
     </Card>
   );
