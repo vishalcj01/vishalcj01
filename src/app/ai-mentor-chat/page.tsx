@@ -4,11 +4,13 @@ import {Textarea} from '@/components/ui/textarea';
 import {Button} from '@/components/ui/button';
 import {useState} from 'react';
 import {getChatResponse} from '@/ai/flows/ai-mentor-chat';
+import {useToast} from '@/hooks/use-toast';
 
 export default function AIMentorChatPage() {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<string[]>([]);
   const [aiResponse, setAiResponse] = useState<string>('');
+  const {toast} = useToast();
 
   const sendMessage = async () => {
     if (message.trim() === '') return;
@@ -27,9 +29,21 @@ export default function AIMentorChatPage() {
       console.error('Error getting chat response:', error);
       setChatHistory(prevHistory => [...prevHistory, `AI: Error getting response.`]);
       setAiResponse('Error getting response. Please try again.');
+      toast({
+        title: 'AI Chat Error',
+        description: error.message || 'Failed to get AI response. Please try again.',
+        variant: 'destructive',
+      });
     }
 
     setMessage('');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault(); // Prevent newline insertion
+      sendMessage();
+    }
   };
 
   return (
@@ -48,6 +62,7 @@ export default function AIMentorChatPage() {
         <Textarea
           value={message}
           onChange={e => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Ask me anything..."
           className="flex-1"
         />
