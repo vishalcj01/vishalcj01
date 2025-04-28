@@ -5,17 +5,20 @@ import {Button} from '@/components/ui/button';
 import {useState} from 'react';
 import {getChatResponse} from '@/ai/flows/ai-mentor-chat';
 import {useToast} from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
 
 export default function AIMentorChatPage() {
   const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState<string[]>([]);
+  const [chatHistory, setChatHistory] = useState<
+    {sender: 'user' | 'ai'; message: string}[]
+  >([]);
   const [aiResponse, setAiResponse] = useState<string>('');
   const {toast} = useToast();
 
   const sendMessage = async () => {
     if (message.trim() === '') return;
 
-    setChatHistory(prevHistory => [...prevHistory, `User: ${message}`]);
+    setChatHistory(prevHistory => [...prevHistory, {sender: 'user', message: message}]);
 
     try {
       const chatResponse = await getChatResponse({
@@ -24,10 +27,16 @@ export default function AIMentorChatPage() {
       });
 
       setAiResponse(chatResponse.response);
-      setChatHistory(prevHistory => [...prevHistory, `AI: ${chatResponse.response}`]);
+      setChatHistory(prevHistory => [
+        ...prevHistory,
+        {sender: 'ai', message: chatResponse.response},
+      ]);
     } catch (error: any) {
       console.error('Error getting chat response:', error);
-      setChatHistory(prevHistory => [...prevHistory, `AI: Error getting response.`]);
+      setChatHistory(prevHistory => [
+        ...prevHistory,
+        {sender: 'ai', message: 'Error getting response.'},
+      ]);
       setAiResponse('Error getting response. Please try again.');
       toast({
         title: 'AI Chat Error',
@@ -49,12 +58,20 @@ export default function AIMentorChatPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex-1 p-4 overflow-y-auto">
-        {chatHistory.map((msg, index) => (
+        {chatHistory.map((chatItem, index) => (
           <div
             key={index}
-            className={`mb-2 p-2 rounded-lg ${msg.startsWith('User:') ? 'bg-secondary text-secondary-foreground self-start' : 'bg-primary text-primary-foreground self-end'}`}
+            className={`mb-2 p-2 rounded-lg ${
+              chatItem.sender === 'user'
+                ? 'bg-secondary text-secondary-foreground self-start'
+                : 'bg-primary text-primary-foreground self-end'
+            }`}
           >
-            {msg}
+            {chatItem.sender === 'user' ? (
+              <div>{chatItem.message}</div>
+            ) : (
+              <ReactMarkdown>{chatItem.message}</ReactMarkdown>
+            )}
           </div>
         ))}
       </div>
