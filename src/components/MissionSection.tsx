@@ -1,33 +1,74 @@
 "use client";
 
-import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-
-const dailyMissions = [
-  {
-    id: 1,
-    type: 'Fitness',
-    title: 'Morning Run',
-    description: 'Go for a 30-minute run.',
-    rewardXp: 150,
-  },
-  {
-    id: 2,
-    type: 'Knowledge',
-    title: 'Read a Book',
-    description: 'Read a chapter of a book.',
-    rewardXp: 120,
-  },
-  {
-    id: 3,
-    type: 'Wealth',
-    title: 'Track Expenses',
-    description: 'Record your expenses for the day.',
-    rewardXp: 100,
-  },
-];
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {useEffect, useState} from 'react';
+import {useToast} from "@/hooks/use-toast";
 
 export const MissionSection = () => {
+  const [missions, setMissions] = useState<any[]>([]);
+  const {toast} = useToast();
+
+  useEffect(() => {
+    const fetchMissions = async () => {
+      try {
+        // Replace with your actual token retrieval logic
+        const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
+        const response = await fetch('/api/missions', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setMissions(data.missions);
+      } catch (error: any) {
+        console.error('Failed to fetch missions:', error);
+        toast({
+          title: 'Error fetching missions',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
+    };
+
+    fetchMissions();
+  }, [toast]);
+
+  const handleSubmitMission = async (missionId: string) => {
+    try {
+      // Replace with your actual token retrieval logic
+      const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
+      const response = await fetch('/api/missions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({missionId}),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      toast({
+        title: 'Mission Completed',
+        description: data.message,
+      });
+      // Refresh missions after submission
+      setMissions(prevMissions => prevMissions.filter(mission => mission.id !== missionId));
+    } catch (error: any) {
+      console.error('Failed to submit mission:', error);
+      toast({
+        title: 'Error submitting mission',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <Card className="glassmorphism neon-border transition-smooth">
       <CardHeader>
@@ -35,17 +76,18 @@ export const MissionSection = () => {
         <CardDescription>Complete these missions to earn XP.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {dailyMissions.map(mission => (
+        {missions.map(mission => (
           <div key={mission.id} className="flex items-center justify-between">
             <div>
               <h4 className="font-semibold">{mission.title}</h4>
               <p className="text-sm text-muted-foreground">{mission.description}</p>
               <p className="text-sm text-muted-foreground">Reward: {mission.rewardXp} XP</p>
             </div>
-            <Button>Submit Completion</Button>
+            <Button onClick={() => handleSubmitMission(mission.id)}>Submit Completion</Button>
           </div>
         ))}
       </CardContent>
     </Card>
   );
 };
+

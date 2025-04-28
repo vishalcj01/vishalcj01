@@ -3,19 +3,55 @@
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Progress} from '@/components/ui/progress';
-
-const user = {
-  name: 'CyberPunk',
-  rank: 'Warrior',
-  title: 'Master',
-  strength: 75,
-  intelligence: 90,
-  wealth: 50,
-  level: 15,
-  avatarUrl: 'https://picsum.photos/id/237/200/300', // Placeholder image
-};
+import {useEffect, useState} from 'react';
+import {useToast} from "@/hooks/use-toast";
 
 export const ProfileSection = () => {
+  const [user, setUser] = useState<any>(null);
+  const {toast} = useToast();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        // Replace with your actual token retrieval logic
+        const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
+        const response = await fetch('/api/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setUser(data.user);
+      } catch (error: any) {
+        console.error('Failed to fetch profile:', error);
+        toast({
+          title: 'Error fetching profile',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
+    };
+
+    fetchProfile();
+  }, [toast]);
+
+  if (!user) {
+    return (
+      <Card className="w-full md:w-80 glassmorphism neon-border transition-smooth">
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Loading profile...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>Loading user profile...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full md:w-80 glassmorphism neon-border transition-smooth">
       <CardHeader>
@@ -55,3 +91,4 @@ export const ProfileSection = () => {
     </Card>
   );
 };
+
