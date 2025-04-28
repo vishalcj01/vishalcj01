@@ -38,6 +38,14 @@ export const ProfileSection = () => {
             });
             return;
           }
+          if (response.status === 500) {
+            toast({
+              title: 'Profile Error',
+              description: 'Failed to load profile data. Please try again later.',
+              variant: 'destructive',
+            });
+            return;
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
