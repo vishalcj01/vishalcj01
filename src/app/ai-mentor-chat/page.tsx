@@ -1,3 +1,4 @@
+
 'use client';
 
 import {Textarea} from '@/components/ui/textarea';
@@ -12,24 +13,27 @@ export default function AIMentorChatPage() {
   const [chatHistory, setChatHistory] = useState<
     {sender: 'user' | 'ai'; message: string}[]
   >([]);
-  const [aiResponse, setAiResponse] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
   const {toast} = useToast();
 
   const sendMessage = async () => {
     if (message.trim() === '') return;
 
+    setIsSubmitting(true); // Disable button while submitting
     setChatHistory(prevHistory => [...prevHistory, {sender: 'user', message: message}]);
 
     try {
       const chatResponse = await getChatResponse({
         message: message,
-        userClass: 'Warrior',
+        userClass: 'Warrior', // Default user class - can be made dynamic later
       });
 
-      setAiResponse(chatResponse.response);
+      // Ensure that response is properly formatted before displaying
+      const formattedResponse = chatResponse.response.trim();
+
       setChatHistory(prevHistory => [
         ...prevHistory,
-        {sender: 'ai', message: chatResponse.response},
+        {sender: 'ai', message: formattedResponse},
       ]);
     } catch (error: any) {
       console.error('Error getting chat response:', error);
@@ -37,15 +41,15 @@ export default function AIMentorChatPage() {
         ...prevHistory,
         {sender: 'ai', message: 'Error getting response.'},
       ]);
-      setAiResponse('Error getting response. Please try again.');
       toast({
         title: 'AI Chat Error',
         description: error.message || 'Failed to get AI response. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false); // Re-enable button
+      setMessage(''); // Clear input field
     }
-
-    setMessage('');
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -61,7 +65,7 @@ export default function AIMentorChatPage() {
         {chatHistory.map((chatItem, index) => (
           <div
             key={index}
-            className={`mb-2 p-2 rounded-lg ${
+            className={`mb-2 p-3 rounded-lg ${
               chatItem.sender === 'user'
                 ? 'bg-secondary text-secondary-foreground self-start'
                 : 'bg-primary text-primary-foreground self-end'
@@ -83,7 +87,9 @@ export default function AIMentorChatPage() {
           placeholder="Ask me anything..."
           className="flex-1"
         />
-        <Button onClick={sendMessage}>Send</Button>
+        <Button onClick={sendMessage} disabled={isSubmitting}>
+          {isSubmitting ? 'Sending...' : 'Send'}
+        </Button>
       </div>
     </div>
   );

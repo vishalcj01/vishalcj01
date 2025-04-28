@@ -1,3 +1,4 @@
+
 "use client";
 
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
@@ -10,12 +11,17 @@ import Link from "next/link";
 export const AIMentorSection = () => {
   const [quote, setQuote] = useState<string>('');
   const [suggestedMissions, setSuggestedMissions] = useState<any[]>([]);
+  const [userClass, setUserClass] = useState<string>('Warrior'); // Default user class
+  const [strength, setStrength] = useState<number>(75);
+  const [intelligence, setIntelligence] = useState<number>(90);
+  const [wealth, setWealth] = useState<number>(50);
+  const [preferredMissionTypes, setPreferredMissionTypes] = useState<string[]>(['Fitness', 'Knowledge']);
 
   useEffect(() => {
     const fetchQuote = async () => {
       try {
         const motivationalQuote = await getMotivationalQuote({
-          userClass: 'Warrior',
+          userClass: userClass,
           missionType: 'Fitness',
           missionDescription: 'Run 5km'
         });
@@ -29,11 +35,11 @@ export const AIMentorSection = () => {
     const fetchMissions = async () => {
       try {
         const missions = await suggestMissions({
-          userClass: 'Warrior',
-          strength: 75,
-          intelligence: 90,
-          wealth: 50,
-          preferredMissionTypes: ['Fitness', 'Knowledge']
+          userClass: userClass,
+          strength: strength,
+          intelligence: intelligence,
+          wealth: wealth,
+          preferredMissionTypes: preferredMissionTypes
         });
         setSuggestedMissions(missions.suggestedMissions);
       } catch (error) {
@@ -44,7 +50,7 @@ export const AIMentorSection = () => {
 
     fetchQuote();
     fetchMissions();
-  }, []);
+  }, [userClass, strength, intelligence, wealth, preferredMissionTypes]);
 
   return (
     <Card className="glassmorphism neon-border transition-smooth">

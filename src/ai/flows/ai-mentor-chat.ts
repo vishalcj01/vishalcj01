@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -40,13 +41,12 @@ const prompt = ai.definePrompt({
     }),
   },
   prompt: `You are an AI mentor in a futuristic, anime-inspired game called LevelUp Earth. Your role is to provide helpful and engaging responses to users.
-  
+
 User Class: {{{userClass}}}
 User Message: {{{message}}}
 
 Respond to the user's message in a helpful and engaging way.
-
-Response:`,
+`,
 });
 
 const aiMentorChatFlow = ai.defineFlow<typeof ChatInputSchema, typeof ChatOutputSchema>(
@@ -57,6 +57,6 @@ const aiMentorChatFlow = ai.defineFlow<typeof ChatInputSchema, typeof ChatOutput
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    return { response: output?.response || '' };
   }
 );

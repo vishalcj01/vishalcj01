@@ -1,3 +1,4 @@
+
 "use client";
 
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
@@ -5,6 +6,8 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Progress} from '@/components/ui/progress';
 import {useEffect, useState} from 'react';
 import {useToast} from "@/hooks/use-toast";
+import {Button} from "@/components/ui/button";
+import Link from 'next/link';
 
 export const ProfileSection = () => {
   const [user, setUser] = useState<any>({
@@ -25,7 +28,8 @@ export const ProfileSection = () => {
       setIsLoading(true); // Start loading
 
       try {
-        const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
+        // Replace with actual JWT token retrieval logic
+        const token = 'test-token'; 
         const response = await fetch('/api/profile', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -112,6 +116,20 @@ export const ProfileSection = () => {
                   <Progress value={user.wealth} />
                 </div>
               </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Link href="/missions">
+                <Button>View Missions</Button>
+              </Link>
+              <Link href="/leaderboard">
+                <Button>View Leaderboard</Button>
+              </Link>
+              <Link href="/payments">
+                <Button>Manage Payments</Button>
+              </Link>
+              <Link href="/achievements">
+                <Button>View Achievements</Button>
+              </Link>
             </div>
           </>
         )}
