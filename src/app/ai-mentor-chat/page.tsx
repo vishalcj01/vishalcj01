@@ -19,7 +19,7 @@ export default function AIMentorChatPage() {
     const motivationalQuote = await getMotivationalQuote({
       userClass: 'Warrior',
       missionType: 'Fitness',
-      missionDescription: message,
+      missionDescription: message, // Use the user's message as the mission description
     });
 
     setQuote(motivationalQuote.quote);
