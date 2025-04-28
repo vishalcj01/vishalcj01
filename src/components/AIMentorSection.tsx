@@ -5,6 +5,7 @@ import {useEffect, useState} from 'react';
 import {getMotivationalQuote} from '@/ai/flows/motivational-anime-quotes';
 import {Button} from "@/components/ui/button";
 import {suggestMissions} from "@/ai/flows/ai-mission-suggestions";
+import Link from "next/link";
 
 export const AIMentorSection = () => {
   const [quote, setQuote] = useState<string>('');
@@ -60,9 +61,10 @@ export const AIMentorSection = () => {
             <p className="text-sm text-muted-foreground">Loading missions...</p>
           )}
         </div>
-        <Button className="mt-4">AI Mentor Chat (Coming Soon...)</Button>
+        <Link href="/ai-mentor-chat">
+          <Button className="mt-4">AI Mentor Chat</Button>
+        </Link>
       </CardContent>
     </Card>
   );
 };
-
