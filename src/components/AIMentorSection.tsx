@@ -13,23 +13,33 @@ export const AIMentorSection = () => {
 
   useEffect(() => {
     const fetchQuote = async () => {
-      const motivationalQuote = await getMotivationalQuote({
-        userClass: 'Warrior',
-        missionType: 'Fitness',
-        missionDescription: 'Run 5km'
-      });
-      setQuote(motivationalQuote.quote);
+      try {
+        const motivationalQuote = await getMotivationalQuote({
+          userClass: 'Warrior',
+          missionType: 'Fitness',
+          missionDescription: 'Run 5km'
+        });
+        setQuote(motivationalQuote.quote);
+      } catch (error) {
+        console.error("Failed to fetch motivational quote:", error);
+        setQuote("Failed to load quote.");
+      }
     };
 
     const fetchMissions = async () => {
-      const missions = await suggestMissions({
-        userClass: 'Warrior',
-        strength: 75,
-        intelligence: 90,
-        wealth: 50,
-        preferredMissionTypes: ['Fitness', 'Knowledge']
-      });
-      setSuggestedMissions(missions.suggestedMissions);
+      try {
+        const missions = await suggestMissions({
+          userClass: 'Warrior',
+          strength: 75,
+          intelligence: 90,
+          wealth: 50,
+          preferredMissionTypes: ['Fitness', 'Knowledge']
+        });
+        setSuggestedMissions(missions.suggestedMissions);
+      } catch (error) {
+        console.error("Failed to fetch suggested missions:", error);
+        setSuggestedMissions([]);
+      }
     };
 
     fetchQuote();

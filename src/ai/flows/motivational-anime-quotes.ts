@@ -77,29 +77,7 @@ const motivationalAnimeQuotesFlow = ai.defineFlow<
     outputSchema: MotivationalQuoteOutputSchema,
   },
   async input => {
-    const maxRetries = 3;
-    let retryCount = 0;
-    let delay = 1000; // Initial delay of 1 second
-
-    while (retryCount <= maxRetries) {
-      try {
-        const {output} = await prompt(input);
-        return output!;
-      } catch (error: any) {
-        if (error.message.includes('The model is overloaded')) {
-          console.warn(`Model overloaded. Retry attempt ${retryCount + 1} of ${maxRetries}. Delay: ${delay}ms`);
-          retryCount++;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // Exponential backoff
-        } else {
-          // If it's a different error, re-throw it
-          console.error('Error getting motivational quote:', error);
-          throw new Error('Failed to get a motivational quote.');
-        }
-      }
-    }
-
-    // If all retries failed, throw an error
-    throw new Error('Failed to get a motivational quote after multiple retries due to model overload.');
+    const {output} = await prompt(input);
+    return output!;
   }
 );

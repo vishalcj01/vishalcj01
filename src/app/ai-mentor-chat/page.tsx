@@ -3,28 +3,32 @@
 import {Textarea} from '@/components/ui/textarea';
 import {Button} from '@/components/ui/button';
 import {useState} from 'react';
-import {getMotivationalQuote} from '@/ai/flows/motivational-anime-quotes';
+import {getChatResponse} from '@/ai/flows/ai-mentor-chat';
 
 export default function AIMentorChatPage() {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<string[]>([]);
-  const [quote, setQuote] = useState<string>('');
+  const [aiResponse, setAiResponse] = useState<string>('');
 
   const sendMessage = async () => {
     if (message.trim() === '') return;
 
-    //Basic history
     setChatHistory(prevHistory => [...prevHistory, `User: ${message}`]);
 
-    const motivationalQuote = await getMotivationalQuote({
-      userClass: 'Warrior',
-      missionType: 'Fitness',
-      missionDescription: message, // Use the user's message as the mission description
-    });
+    try {
+      const chatResponse = await getChatResponse({
+        message: message,
+        userClass: 'Warrior',
+      });
 
-    setQuote(motivationalQuote.quote);
+      setAiResponse(chatResponse.response);
+      setChatHistory(prevHistory => [...prevHistory, `AI: ${chatResponse.response}`]);
+    } catch (error: any) {
+      console.error('Error getting chat response:', error);
+      setChatHistory(prevHistory => [...prevHistory, `AI: Error getting response.`]);
+      setAiResponse('Error getting response. Please try again.');
+    }
 
-    setChatHistory(prevHistory => [...prevHistory, `AI: ${motivationalQuote.quote}`]);
     setMessage('');
   };
 
