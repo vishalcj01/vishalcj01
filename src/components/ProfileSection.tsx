@@ -7,7 +7,16 @@ import {useEffect, useState} from 'react';
 import {useToast} from "@/hooks/use-toast";
 
 export const ProfileSection = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>({
+    name: 'Loading...',
+    level: 0,
+    title: '...',
+    rank: '...',
+    strength: 0,
+    intelligence: 0,
+    wealth: 0,
+    avatarUrl: '',
+  });
   const {toast} = useToast();
 
   useEffect(() => {
@@ -21,6 +30,14 @@ export const ProfileSection = () => {
           },
         });
         if (!response.ok) {
+          if (response.status === 401) {
+            toast({
+              title: 'Unauthorized',
+              description: 'Please log in to view your profile.',
+              variant: 'destructive',
+            });
+            return;
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
@@ -37,20 +54,6 @@ export const ProfileSection = () => {
 
     fetchProfile();
   }, [toast]);
-
-  if (!user) {
-    return (
-      <Card className="w-full md:w-80 glassmorphism neon-border transition-smooth">
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Loading profile...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p>Loading user profile...</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full md:w-80 glassmorphism neon-border transition-smooth">
@@ -91,4 +94,3 @@ export const ProfileSection = () => {
     </Card>
   );
 };
-
