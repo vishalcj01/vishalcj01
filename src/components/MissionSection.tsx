@@ -4,6 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {useEffect, useState} from 'react';
 import {useToast} from "@/hooks/use-toast";
+import {submitMissionCompletion} from "@/app/actions";
 
 export const MissionSection = () => {
   const [missions, setMissions] = useState<any[]>([]);
@@ -14,12 +15,7 @@ export const MissionSection = () => {
     const fetchMissions = async () => {
       setIsLoading(true);
       try {
-        const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
-        const response = await fetch('/api/missions', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch('/api/missions');
         if (!response.ok) {
           let errorMessage = `HTTP error! status: ${response.status}`;
           try {
@@ -61,33 +57,19 @@ export const MissionSection = () => {
     fetchMissions();
   }, [toast]);
 
-  const handleSubmitMission = async (missionId: string) => {
-    try {
-      // Replace with your actual token retrieval logic
-      const token = 'YOUR_AUTH_TOKEN'; // Replace with actual JWT token
-      const response = await fetch('/api/missions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({missionId}),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+  const handleMissionCompletion = async (missionId: string) => {
+    const result = await submitMissionCompletion(missionId);
+
+    if (result.success) {
       toast({
         title: 'Mission Completed',
-        description: data.message,
+        description: result.message,
       });
-      // Refresh missions after submission
-      setMissions(prevMissions => prevMissions.filter(mission => mission.id !== missionId));
-    } catch (error: any) {
-      console.error('Failed to submit mission:', error);
+      setMissions((prevMissions) => prevMissions.filter((mission) => mission.id !== missionId));
+    } else {
       toast({
         title: 'Error submitting mission',
-        description: error.message,
+        description: result.message || 'Failed to submit mission',
         variant: 'destructive',
       });
     }
@@ -110,7 +92,7 @@ export const MissionSection = () => {
                 <p className="text-sm text-muted-foreground">{mission.description}</p>
                 <p className="text-sm text-muted-foreground">Reward: {mission.rewardXp} XP</p>
               </div>
-              <Button onClick={() => handleSubmitMission(mission.id)}>Submit Completion</Button>
+              <Button onClick={() => handleMissionCompletion(mission.id)}>Submit Completion</Button>
             </div>
           ))
         )}
