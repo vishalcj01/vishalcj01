@@ -20,6 +20,22 @@ export const MissionSection = () => {
           },
         });
         if (!response.ok) {
+          if (response.status === 401) {
+            toast({
+              title: 'Unauthorized',
+              description: 'Please log in to view your missions.',
+              variant: 'destructive',
+            });
+            return;
+          }
+          if (response.status === 500) {
+            toast({
+              title: 'Mission Error',
+              description: 'Failed to load missions. Please try again later.',
+              variant: 'destructive',
+            });
+            return;
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
@@ -90,4 +106,3 @@ export const MissionSection = () => {
     </Card>
   );
 };
-
